@@ -52,6 +52,8 @@ group :development, :test do
 
   # Load environment variables from .env file
   gem "dotenv-rails"
+
+  gem "capybara"
 end
 
 

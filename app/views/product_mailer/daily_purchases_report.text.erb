@@ -1,0 +1,1 @@
+Daily Purchases Report - <%= @report_date %>\n\n<% if @rows.any? %>\nProduct Name | Quantity Sold | Revenue\n--------------------------------------\n<% @rows.each do |r| %>\n<%= r.name %> | <%= r.sold_count %> | <%= sprintf('%.2f', r.revenue) %>\n<% end %>\n<% else %>\nNo purchases were made yesterday.\n<% end %>\n

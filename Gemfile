@@ -43,6 +43,9 @@ gem "jwt", "~> 2.8"
 gem "sidekiq", "~> 7.2"
 gem "sidekiq-cron", "~> 1.12"
 
+gem "rswag-api"
+gem "rswag-ui"
+
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 # gem "rack-cors"
 group :development, :test do
@@ -52,7 +55,6 @@ group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
-  gem "rspec-rails"
 
   gem "factory_bot_rails"
 
@@ -63,6 +65,10 @@ group :development, :test do
   gem "dotenv-rails"
 
   gem "capybara"
+
+  gem "rspec-rails"
+
+  gem "rswag-specs"
 end
 
 

@@ -37,7 +37,7 @@ gem "active_model_serializers"
 
 # Authentication & JWT
 gem "bcrypt", "~> 3.1"
-gem "jwt", "~> 2.8"
+gem "jwt", "~> 3.1"
 
 # Background processing (Sidekiq for daily purchases report)
 gem "sidekiq", "~> 7.2"

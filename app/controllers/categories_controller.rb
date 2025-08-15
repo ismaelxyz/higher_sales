@@ -1,4 +1,5 @@
 class CategoriesController < ApplicationController
+  skip_before_action :authenticate_admin!, only: [ :index, :show ]
   def index
     @categories = Category.all
     render json: @categories

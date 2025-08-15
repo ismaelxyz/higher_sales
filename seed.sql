@@ -1,7 +1,8 @@
 INSERT INTO admins (name, email, password, created_at, updated_at)
 VALUES 
-  ('Tilia Vega', 'tilia@example.com', 'securepass123', NOW(), NOW()),
-  ('Lucía Fernández', 'lucia@example.com', 'strongpass456', NOW(), NOW());
+  -- pwd: securepass123, strongpass456
+  ('Tilia Vega', 'tilia@example.com', '$2a$12$OGFHd0CZ0g2WvDXAAL8oUedpEFhGELoBMCRg7VNvrChxSXuCM.Ni6', NOW(), NOW()),
+  ('Lucía Fernández', 'lucia@example.com', '$2a$12$1X4fRsucxLprSXzKaKMIuuQXCQ.PpnR.r0AGOwMAhXQ1h55s07G1C', NOW(), NOW());
 
 
 INSERT INTO products (name, description, price, created_by_admin_id, created_at, updated_at)

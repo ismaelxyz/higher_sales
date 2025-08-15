@@ -9,5 +9,11 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   # NOTE: Following Zalando's guidelines, we will omit "/api/v1"
-  resources :categories #, only: [:index, :show, :create, :update, :destroy]
+  resources :categories # , only: [:index, :show, :create, :update, :destroy]
+
+  # Authentication
+  post "auth/login", to: "auth#login"
+
+  # Reports
+  get "reports/top-products-by-category", to: "reports#top_products_by_category"
 end

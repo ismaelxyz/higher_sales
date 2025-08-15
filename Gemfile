@@ -43,9 +43,20 @@ group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
+  gem "rspec-rails"
+
+  gem "factory_bot_rails"
+
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
 
   # Load environment variables from .env file
-  gem 'dotenv-rails'
+  gem "dotenv-rails"
+end
+
+
+group :development do
+  gem "capybara-email"
+
+  gem "letter_opener"
 end

@@ -86,6 +86,8 @@ production:
     database: higher_sales_production
     username: <%= ENV["HIGHER_SALES_DATABASE_USER"] %>
     password: <%= ENV["HIGHER_SALES_DATABASE_PASSWORD"] %>
+    host: <%= ENV["HIGHER_SALES_DATABASE_HOST"] %>
+    port: <%= ENV["HIGHER_SALES_DATABASE_PORT"] %>
   cache:
     <<: *primary_production
     database: higher_sales_production_cache

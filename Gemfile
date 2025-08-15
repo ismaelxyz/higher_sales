@@ -56,7 +56,5 @@ end
 
 
 group :development do
-  gem "capybara-email"
-
   gem "letter_opener"
 end

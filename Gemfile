@@ -16,9 +16,10 @@ gem "puma", ">= 5.0"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
-gem "solid_cache"
-gem "solid_queue"
-gem "solid_cable"
+# NOTE: Removed solid_queue related gems after migrating to Sidekiq
+# gem "solid_cache"
+# gem "solid_queue"
+# gem "solid_cable"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -37,6 +38,10 @@ gem "active_model_serializers"
 # Authentication & JWT
 gem "bcrypt", "~> 3.1"
 gem "jwt", "~> 2.8"
+
+# Background processing (Sidekiq for daily purchases report)
+gem "sidekiq", "~> 7.2"
+gem "sidekiq-cron", "~> 1.12"
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 # gem "rack-cors"

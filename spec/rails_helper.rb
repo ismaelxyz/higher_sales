@@ -2,6 +2,8 @@
 ENV['RAILS_ENV'] ||= 'test'
 require File.expand_path('../config/environment', __dir__)
 require 'rspec/rails'
+require 'sidekiq/testing'
+Sidekiq::Testing.inline! # Run jobs immediately in specs (can switch to fake! if needed)
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb`

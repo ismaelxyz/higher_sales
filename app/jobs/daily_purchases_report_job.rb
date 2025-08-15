@@ -1,8 +1,7 @@
 class DailyPurchasesReportJob < ApplicationJob
-  queue_as :default
-
-  # Perform the job for the previous day unless a specific date is passed
+  # Deprecated: Replaced by `DailyPurchasesReportWorker` (Sidekiq)
   def perform(report_date = Date.yesterday)
-    ProductMailer.daily_purchases_report(report_date).deliver_now
+    Rails.logger.warn("DailyPurchasesReportJob is deprecated. Use DailyPurchasesReportWorker instead.")
+    DailyPurchasesReportWorker.perform_async(report_date.to_s)
   end
 end

@@ -3,22 +3,23 @@
 This README would normally document whatever steps are necessary to get the
 application up and running.
 
-Things you may want to cover:
+## Background Jobs (Sidekiq)
 
-* Ruby version
+This project uses Sidekiq + sidekiq-cron for background processing (daily purchases report).
 
-* System dependencies
+1. Start Redis:
+```
+docker run -d --name redis -p 6379:6379 redis:7-alpine
+```
+2. Start Sidekiq:
+```
+bundle exec sidekiq -C config/sidekiq.yml
+```
+3. Web UI is mounted at `/sidekiq`.
 
-* Configuration
+Daily report runs every day at 06:00 (server time) via cron schedule. To enqueue manually:
+```
+DailyPurchasesReportWorker.perform_async
+```
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Environment variable `REDIS_URL` can override default `redis://localhost:6379/0`.

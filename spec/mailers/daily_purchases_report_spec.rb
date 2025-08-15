@@ -33,7 +33,7 @@ RSpec.describe 'DailyPurchasesReport', type: :mailer do
         create(:purchase, client: client, product: product_b)
 
         expect {
-          DailyPurchasesReportJob.perform_now(date_yesterday)
+          DailyPurchasesReportWorker.perform_async(date_yesterday.to_s)
         }.to change { ActionMailer::Base.deliveries.count }.by(1)
 
         email = ActionMailer::Base.deliveries.last
@@ -52,7 +52,7 @@ RSpec.describe 'DailyPurchasesReport', type: :mailer do
       date_yesterday = Date.new(2025, 8, 13)
 
       expect {
-        DailyPurchasesReportJob.perform_now(date_yesterday)
+        DailyPurchasesReportWorker.perform_async(date_yesterday.to_s)
       }.to change { ActionMailer::Base.deliveries.count }.by(1)
 
       email = ActionMailer::Base.deliveries.last

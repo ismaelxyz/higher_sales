@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :product do
-    name { "Sample Product" }
+  sequence(:name) { |n| "Sample Product #{n}" }
     description { "This is a sample product." }
     price { 19.99 }
     association :created_by_admin, factory: :admin

@@ -18,6 +18,10 @@ Rails.application.routes.draw do
   get "reports/top-products-by-category", to: "reports#top_products_by_category"
   get "reports/top-revenue-products-by-category", to: "reports#top_revenue_products_by_category"
 
-  # Purchases listing with filters
-  resources :purchases, only: [ :index ]
+    # Purchases listing with filters
+    resources :purchases, only: [ :index ] do
+      collection do
+        get :counts
+      end
+    end
 end

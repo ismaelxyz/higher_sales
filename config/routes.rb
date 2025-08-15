@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
-  mount Rswag::Ui::Engine => '/api-docs'
-  mount Rswag::Api::Engine => '/api-docs'
+  # Swagger (solo en development y test)
+  if Rails.env.development? || Rails.env.test?
+    mount Rswag::Ui::Engine => "/api-docs"
+    mount Rswag::Api::Engine => "/api-docs"
+  end
   require "sidekiq/web"
   # Optionally secure with basic auth in production
   mount Sidekiq::Web => "/sidekiq"

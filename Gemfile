@@ -41,7 +41,7 @@ gem "jwt", "~> 2.8"
 
 # Background processing (Sidekiq for daily purchases report)
 gem "sidekiq", "~> 7.2"
-gem "sidekiq-cron", "~> 1.12"
+gem "sidekiq-cron", "~> 2.3"
 
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible

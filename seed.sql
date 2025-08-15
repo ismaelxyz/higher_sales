@@ -14,6 +14,21 @@ VALUES
   ('Alfombra Antideslizante', 'Alfombra decorativa con base antideslizante, ideal para salas y dormitorios.', 39.90, 1, NOW(), NOW()),
   ('Mesa Plegable Compacta', 'Mesa plegable de aluminio, perfecta para espacios reducidos o exteriores.', 74.25, 2, NOW(), NOW());
 
+INSERT INTO categories (name, description, created_by_admin_id, created_at, updated_at)
+VALUES
+  ('Muebles Funcionales', 'Muebles prácticos y versátiles para el hogar y la oficina.', 1, NOW(), NOW()),
+  ('Iluminación Inteligente', 'Lámparas y sistemas de iluminación con tecnología avanzada.', 1, NOW(), NOW()),
+  ('Decoración & Textiles', 'Artículos decorativos y textiles para embellecer espacios.', 2, NOW(), NOW());
+
+
+INSERT INTO products_categories (categories_id, products_id, created_at, updated_at)
+VALUES
+  (1, 1, NOW(), NOW()), -- Escritorio Minimalista -> Muebles Funcionales
+  (1, 2, NOW(), NOW()), -- Silla Ergonómica Pro -> Muebles Funcionales
+  (2, 3, NOW(), NOW()), -- Lámpara LED Inteligente -> Iluminación Inteligente
+  (1, 4, NOW(), NOW()), -- Estantería Modular -> Muebles Funcionales
+  (3, 5, NOW(), NOW()), -- Alfombra Antideslizante -> Decoración & Textiles
+  (1, 6, NOW(), NOW()); -- Mesa Plegable Compacta -> Muebles Funcionales
 
 INSERT INTO images (product_id, path, created_at, updated_at)
 VALUES

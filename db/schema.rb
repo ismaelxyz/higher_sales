@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_15_000000) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_23_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -41,6 +41,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_000000) do
     t.bigint "created_by_admin_id", null: false
     t.index ["created_by_admin_id"], name: "index_categories_on_created_by_admin_id"
     t.index ["name"], name: "index_categories_on_name", unique: true
+  end
+
+  create_table "client_first_purchase_notifications", force: :cascade do |t|
+    t.bigint "client_id", null: false
+    t.bigint "purchase_id"
+    t.bigint "products_sold_id"
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["client_id"], name: "index_cfpn_on_client_id_unique", unique: true
+    t.index ["client_id"], name: "index_client_first_purchase_notifications_on_client_id"
+    t.index ["products_sold_id"], name: "index_client_first_purchase_notifications_on_products_sold_id"
+    t.index ["purchase_id"], name: "index_client_first_purchase_notifications_on_purchase_id"
   end
 
   create_table "clients", force: :cascade do |t|
@@ -98,6 +109,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_000000) do
 
   add_foreign_key "admin_change_logs", "admins"
   add_foreign_key "categories", "admins", column: "created_by_admin_id"
+  add_foreign_key "client_first_purchase_notifications", "clients"
+  add_foreign_key "client_first_purchase_notifications", "products_solds"
+  add_foreign_key "client_first_purchase_notifications", "purchases"
   add_foreign_key "images", "products"
   add_foreign_key "products", "admins", column: "created_by_admin_id"
   add_foreign_key "products_categories", "categories", column: "categories_id"

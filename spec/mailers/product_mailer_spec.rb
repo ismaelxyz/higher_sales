@@ -9,9 +9,11 @@ RSpec.describe ProductMailer, type: :mailer do
       product = create(:product, created_by_admin: creator)
       client = create(:client)
 
-      expect {
-        create(:purchase, product: product, client: client)
-      }.to change { ActionMailer::Base.deliveries.count }.by(1)
+      perform_enqueued_jobs do
+        expect {
+          create(:purchase, product: product, client: client)
+        }.to change { ActionMailer::Base.deliveries.count }.by(1)
+      end
 
       email = ActionMailer::Base.deliveries.last
       expect(email.to).to include(creator.email)

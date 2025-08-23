@@ -4,6 +4,7 @@ require File.expand_path('../config/environment', __dir__)
 require 'rspec/rails'
 require 'sidekiq/testing'
 Sidekiq::Testing.inline! # Run jobs immediately in specs (can switch to fake! if needed)
+require 'active_job/test_helper'
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb`
@@ -32,6 +33,7 @@ end
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include ActiveSupport::Testing::TimeHelpers
+  config.include ActiveJob::TestHelper
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   # config.fixture_path = "#{::Rails.root}/spec/fixtures"
@@ -64,3 +66,6 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
 end
+
+# Ensure ActiveJob uses the test adapter during specs
+ActiveJob::Base.queue_adapter = :test

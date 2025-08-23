@@ -85,6 +85,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_23_000001) do
     t.bigint "products_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["categories_id", "products_id"], name: "index_products_categories_on_categories_id_and_products_id"
     t.index ["categories_id"], name: "index_products_categories_on_categories_id"
     t.index ["products_id"], name: "index_products_categories_on_products_id"
   end

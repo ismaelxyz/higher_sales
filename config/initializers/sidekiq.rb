@@ -10,6 +10,11 @@ Sidekiq.configure_server do |config|
       "class" => "DailyPurchasesReportWorker",
       "cron" => "0 6 * * *", # every day at 06:00 server time
       "queue" => "default"
+    },
+    "reports_cache_warm" => {
+      "class" => "ReportsCacheWarmWorker",
+      "cron" => "*/5 * * * *", # every 5 minutes
+      "queue" => "default"
     }
   }
   if defined?(Sidekiq::Cron) && Sidekiq.server?

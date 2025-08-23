@@ -1,8 +1,21 @@
-class ReportsController < ApplicationController
-  # GET /reports/top-products-by-category?limit=3
-  def top_products_by_category
-    limit = params.fetch(:limit, 3).to_i.clamp(1, 100)
+# frozen_string_literal: true
 
+class ReportsCacheWarmWorker
+  include Sidekiq::Worker
+  sidekiq_options queue: :default, retry: 2
+
+  DEFAULT_LIMITS = [ 3 ].freeze
+
+  def perform
+    DEFAULT_LIMITS.each do |limit|
+      warm_top_products_by_category(limit)
+      warm_top_revenue_products_by_category(limit)
+    end
+  end
+
+  private
+
+  def warm_top_products_by_category(limit)
     sql = <<~SQL.squish
       WITH aggregated AS (
         SELECT c.id AS category_id,
@@ -33,32 +46,17 @@ class ReportsController < ApplicationController
                ORDER BY total_sold DESC, product_id ASC
              ) AS products
       FROM ranked
-      WHERE rn <= #{limit}
+      WHERE rn <= #{Integer(limit)}
       GROUP BY category_id, category_name
       ORDER BY category_id ASC
     SQL
 
-    payload = Rails.cache.fetch("reports:top_products_by_category:v1:limit=#{limit}", expires_in: 5.minutes) do
-      result = ActiveRecord::Base.connection.exec_query(sql)
-      result.to_a.map do |row|
-        {
-          category_id: row["category_id"].to_i,
-          category_name: row["category_name"],
-          products: JSON.parse(row["products"]).map do |p|
-            { id: p["id"].to_i, name: p["name"], total_sold: p["total_sold"].to_i }
-          end
-        }
-      end
+    Rails.cache.fetch("reports:top_products_by_category:v1:limit=#{limit}", expires_in: 5.minutes) do
+      ActiveRecord::Base.connection.exec_query(sql).to_a
     end
-
-    render json: payload, status: :ok
   end
 
-  # GET /reports/top-revenue-products-by-category?limit=3
-  # Returns, para cada categoría, los N (default 3) productos con mayor recaudación (SUM precio en products_solds)
-  def top_revenue_products_by_category
-    limit = params.fetch(:limit, 3).to_i.clamp(1, 100)
-
+  def warm_top_revenue_products_by_category(limit)
     sql = <<~SQL.squish
       WITH aggregated AS (
         SELECT c.id AS category_id,
@@ -89,24 +87,13 @@ class ReportsController < ApplicationController
                ORDER BY total_revenue DESC, product_id ASC
              ) AS products
       FROM ranked
-      WHERE rn <= #{limit}
+      WHERE rn <= #{Integer(limit)}
       GROUP BY category_id, category_name
       ORDER BY category_id ASC
     SQL
 
-    payload = Rails.cache.fetch("reports:top_revenue_products_by_category:v1:limit=#{limit}", expires_in: 5.minutes) do
-      result = ActiveRecord::Base.connection.exec_query(sql)
-      result.to_a.map do |row|
-        {
-          category_id: row["category_id"].to_i,
-          category_name: row["category_name"],
-          products: JSON.parse(row["products"]).map do |p|
-            { id: p["id"].to_i, name: p["name"], total_revenue: p["total_revenue"].to_f }
-          end
-        }
-      end
+    Rails.cache.fetch("reports:top_revenue_products_by_category:v1:limit=#{limit}", expires_in: 5.minutes) do
+      ActiveRecord::Base.connection.exec_query(sql).to_a
     end
-
-    render json: payload, status: :ok
   end
 end

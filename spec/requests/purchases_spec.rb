@@ -27,27 +27,28 @@ RSpec.describe 'Purchases index', type: :request do
     get '/purchases', headers: auth_headers
     expect(response).to have_http_status(:ok)
     json = JSON.parse(response.body)
-    expect(json.size).to eq(3)
+    expect(json['data'].size).to eq(3)
+    expect(json['_metadata']).to include('page', 'per_page', 'total', 'total_pages')
   end
 
   it 'filters by client_id' do
     get '/purchases', params: { client_id: client1.id }, headers: auth_headers
     json = JSON.parse(response.body)
-    ids = json.map { |p| p['id'] }
+  ids = json['data'].map { |p| p['id'] }
     expect(ids).to contain_exactly(purchase1.id, purchase2.id)
   end
 
   it 'filters by category_id (cat A)' do
     get '/purchases', params: { category_id: cat_a.id }, headers: auth_headers
     json = JSON.parse(response.body)
-    ids = json.map { |p| p['id'] }
+    ids = json['data'].map { |p| p['id'] }
     expect(ids).to contain_exactly(purchase1.id, purchase2.id)
   end
 
   it 'filters by admin_id (admin)' do
     get '/purchases', params: { admin_id: admin.id }, headers: auth_headers
     json = JSON.parse(response.body)
-    ids = json.map { |p| p['id'] }
+    ids = json['data'].map { |p| p['id'] }
     expect(ids).to contain_exactly(purchase1.id, purchase2.id)
   end
 
@@ -55,7 +56,26 @@ RSpec.describe 'Purchases index', type: :request do
     purchase2.update!(created_at: 2.days.ago)
     get '/purchases', params: { from: 1.day.ago.to_date.to_s }, headers: auth_headers
     json = JSON.parse(response.body)
-    ids = json.map { |p| p['id'] }
+    ids = json['data'].map { |p| p['id'] }
     expect(ids).not_to include(purchase2.id)
+  end
+
+  it 'paginates with page and per_page params' do
+    client3 = create(:client)
+    products = [ product_a1, product_a2, product_b1 ]
+    30.times do
+      create(:purchase, client: client3, products: [ products.sample ])
+    end
+
+    get '/purchases', params: { per_page: 10, page: 1 }, headers: auth_headers
+    json1 = JSON.parse(response.body)
+    expect(json1['data'].length).to eq(10)
+    expect(json1['_metadata']['page']).to eq(1)
+    expect(json1['_metadata']['per_page']).to eq(10)
+
+    get '/purchases', params: { per_page: 10, page: 2 }, headers: auth_headers
+    json2 = JSON.parse(response.body)
+    expect(json2['data'].length).to eq(10)
+    expect(json2['_metadata']['page']).to eq(2)
   end
 end

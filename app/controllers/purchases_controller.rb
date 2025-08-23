@@ -7,8 +7,32 @@ class PurchasesController < ApplicationController
   # client_id: filters purchases by client
   # admin_id: filters purchases that include products created by the specified admin (any product in the purchase)
   def index
-    purchases = filtered_purchases.includes(:client, products_solds: { product: { products_categories: :category } })
-    render json: purchases.map { |p| serialize_purchase(p) }
+    scope = filtered_purchases
+
+    page = params[:page].to_i
+    page = 1 if page < 1
+    per_page = params[:per_page].to_i
+    per_page = 25 if per_page <= 0
+    per_page = 100 if per_page > 100
+
+    total = scope.count(:all)
+    total_pages = (total.to_f / per_page).ceil
+
+    purchases = scope
+                  .order(created_at: :desc)
+                  .limit(per_page)
+                  .offset((page - 1) * per_page)
+                  .includes(:client, products_solds: { product: { products_categories: :category } })
+
+    render json: {
+      data: purchases.map { |p| serialize_purchase(p) },
+      _metadata: {
+        page: page,
+        per_page: per_page,
+        total: total,
+        total_pages: total_pages
+      }
+    }
   end
 
   # GET /purchases/counts?granularity=hour|day|week|year plus same filters as index

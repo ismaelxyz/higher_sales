@@ -1,112 +1,14 @@
 class ReportsController < ApplicationController
   # GET /reports/top-products-by-category?limit=3
   def top_products_by_category
-    limit = params.fetch(:limit, 3).to_i.clamp(1, 100)
-
-    sql = <<~SQL.squish
-      WITH aggregated AS (
-        SELECT c.id AS category_id,
-               c.name AS category_name,
-               p.id AS product_id,
-               p.name AS product_name,
-               COUNT(ps.id) AS total_sold
-        FROM products_solds ps
-        JOIN products p ON p.id = ps.products_id
-        JOIN products_categories pc ON pc.products_id = p.id
-        JOIN categories c ON c.id = pc.categories_id
-        GROUP BY c.id, c.name, p.id, p.name
-      ), ranked AS (
-        SELECT *, ROW_NUMBER() OVER (
-          PARTITION BY category_id
-          ORDER BY total_sold DESC, product_id ASC
-        ) AS rn
-        FROM aggregated
-      )
-      SELECT category_id,
-             category_name,
-             json_agg(
-               json_build_object(
-                 'id', product_id,
-                 'name', product_name,
-                 'total_sold', total_sold
-               )
-               ORDER BY total_sold DESC, product_id ASC
-             ) AS products
-      FROM ranked
-      WHERE rn <= #{limit}
-      GROUP BY category_id, category_name
-      ORDER BY category_id ASC
-    SQL
-
-    payload = Rails.cache.fetch("reports:top_products_by_category:v1:limit=#{limit}", expires_in: 5.minutes) do
-      result = ActiveRecord::Base.connection.exec_query(sql)
-      result.to_a.map do |row|
-        {
-          category_id: row["category_id"].to_i,
-          category_name: row["category_name"],
-          products: JSON.parse(row["products"]).map do |p|
-            { id: p["id"].to_i, name: p["name"], total_sold: p["total_sold"].to_i }
-          end
-        }
-      end
-    end
-
-    render json: payload, status: :ok
+  limit = params.fetch(:limit, 3)
+  render json: Reports::TopProductsByCategoryQuery.call(limit: limit), status: :ok
   end
 
   # GET /reports/top-revenue-products-by-category?limit=3
   # Returns, para cada categoría, los N (default 3) productos con mayor recaudación (SUM precio en products_solds)
   def top_revenue_products_by_category
-    limit = params.fetch(:limit, 3).to_i.clamp(1, 100)
-
-    sql = <<~SQL.squish
-      WITH aggregated AS (
-        SELECT c.id AS category_id,
-               c.name AS category_name,
-               p.id AS product_id,
-               p.name AS product_name,
-               COALESCE(SUM(ps.price), 0) AS total_revenue
-        FROM products_solds ps
-        JOIN products p ON p.id = ps.products_id
-        JOIN products_categories pc ON pc.products_id = p.id
-        JOIN categories c ON c.id = pc.categories_id
-        GROUP BY c.id, c.name, p.id, p.name
-      ), ranked AS (
-        SELECT *, ROW_NUMBER() OVER (
-          PARTITION BY category_id
-          ORDER BY total_revenue DESC, product_id ASC
-        ) AS rn
-        FROM aggregated
-      )
-      SELECT category_id,
-             category_name,
-             json_agg(
-               json_build_object(
-                 'id', product_id,
-                 'name', product_name,
-                 'total_revenue', total_revenue
-               )
-               ORDER BY total_revenue DESC, product_id ASC
-             ) AS products
-      FROM ranked
-      WHERE rn <= #{limit}
-      GROUP BY category_id, category_name
-      ORDER BY category_id ASC
-    SQL
-
-    payload = Rails.cache.fetch("reports:top_revenue_products_by_category:v1:limit=#{limit}", expires_in: 5.minutes) do
-      result = ActiveRecord::Base.connection.exec_query(sql)
-      result.to_a.map do |row|
-        {
-          category_id: row["category_id"].to_i,
-          category_name: row["category_name"],
-          products: JSON.parse(row["products"]).map do |p|
-            { id: p["id"].to_i, name: p["name"], total_revenue: p["total_revenue"].to_f }
-          end
-        }
-      end
-    end
-
-    render json: payload, status: :ok
+  limit = params.fetch(:limit, 3)
+  render json: Reports::TopRevenueProductsByCategoryQuery.call(limit: limit), status: :ok
   end
 end

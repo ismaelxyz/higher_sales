@@ -2,7 +2,7 @@
 
 # Sidekiq configuration. Uses Redis URL from ENV or defaults.
 Sidekiq.configure_server do |config|
-  config.redis = { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0") }
+  config.redis = { url: ENV.fetch("REDIS_URL") { "redis://localhost:6379/0" } }
 
   # Load cron schedule for daily report if present
   schedule = {
@@ -23,5 +23,5 @@ Sidekiq.configure_server do |config|
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0") }
+  config.redis = { url: ENV.fetch("REDIS_URL") { "redis://localhost:6379/0" } }
 end

@@ -73,6 +73,8 @@ group :development, :test do
 
   # Code quality checks
   gem "reek"
+
+  gem "fasterer"
 end
 
 

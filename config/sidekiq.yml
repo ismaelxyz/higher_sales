@@ -1,5 +1,9 @@
 ---
-:concurrency: <%= ENV.fetch('SIDEKIQ_CONCURRENCY', 5) %>
+:concurrency: <%= ENV.fetch('SIDEKIQ_CONCURRENCY', 10) %>
 :queues:
-  - [mailers, 2]
-  - [default, 1]
+  # Prioritize mail delivery to keep user-facing flows snappy
+  - [mailers, 3]
+  # General-purpose app jobs
+  - [default, 2]
+  # Background cache/report warmers and heavier aggregations
+  - [reports, 1]

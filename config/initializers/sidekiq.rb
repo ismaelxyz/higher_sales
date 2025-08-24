@@ -9,16 +9,25 @@ Sidekiq.configure_server do |config|
     "daily_purchases_report" => {
       "class" => "DailyPurchasesReportWorker",
       "cron" => "0 6 * * *", # every day at 06:00 server time
-      "queue" => "default"
+      "queue" => "reports"
     },
     "reports_cache_warm" => {
       "class" => "ReportsCacheWarmWorker",
       "cron" => "*/5 * * * *", # every 5 minutes
-      "queue" => "default"
+      "queue" => "reports"
     }
   }
   if defined?(Sidekiq::Cron) && Sidekiq.server?
     Sidekiq::Cron::Job.load_from_hash(schedule)
+  end
+
+  # Align AR connection pool with Sidekiq concurrency to avoid DB starvation
+  if defined?(ActiveRecord)
+    concurrency = Integer(ENV.fetch("SIDEKIQ_CONCURRENCY", 10))
+    db_config = ActiveRecord::Base.connection_db_config
+    if db_config && db_config.configuration_hash[:pool].to_i < concurrency
+      ActiveRecord::Base.establish_connection(db_config.configuration_hash.merge(pool: concurrency))
+    end
   end
 end
 

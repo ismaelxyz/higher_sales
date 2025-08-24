@@ -2,7 +2,7 @@
 
 class ReportsCacheWarmWorker
   include Sidekiq::Worker
-  sidekiq_options queue: :default, retry: 2
+  sidekiq_options queue: :reports, retry: 2
 
   DEFAULT_LIMITS = [ 3 ].freeze
 

@@ -19,7 +19,7 @@
 # @return [void]
 class DailyPurchasesReportWorker
   include Sidekiq::Worker
-  sidekiq_options queue: :default, retry: 3
+  sidekiq_options queue: :reports, retry: 3
 
   # Performs the daily purchases report email for the previous day or a provided date.
   # @param [String,nil] date_str Optional date string (YYYY-MM-DD)

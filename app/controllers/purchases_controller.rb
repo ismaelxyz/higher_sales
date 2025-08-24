@@ -15,7 +15,10 @@ class PurchasesController < ApplicationController
     per_page = 25 if per_page <= 0
     per_page = 100 if per_page > 100
 
-    total = scope.count(:all)
+  total = scope
+        .except(:order, :select)
+        .distinct
+        .count(:id)
     total_pages = (total.to_f / per_page).ceil
 
     purchases = scope

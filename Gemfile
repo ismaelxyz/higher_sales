@@ -70,6 +70,9 @@ group :development, :test do
   gem "rspec-rails"
 
   gem "rswag-specs"
+
+  # Code quality checks
+  gem "reek"
 end
 
 

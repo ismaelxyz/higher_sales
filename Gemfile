@@ -50,9 +50,6 @@ group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
-  # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
-  gem "brakeman", require: false
-
   gem "factory_bot_rails"
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
@@ -72,9 +69,12 @@ group :development, :test do
   gem "rswag-specs"
 
   # Code quality checks
-  gem "reek"
+  gem "reek", require: false
 
-  gem "fasterer"
+  gem "fasterer", require: false
+
+  # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
+  gem "brakeman", require: false
 end
 
 

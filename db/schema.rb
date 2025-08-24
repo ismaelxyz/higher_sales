@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_23_000001) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_24_090200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,6 +96,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_23_000001) do
     t.decimal "price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_products_solds_on_created_at"
     t.index ["products_id"], name: "index_products_solds_on_products_id"
     t.index ["purchases_id"], name: "index_products_solds_on_purchases_id"
   end
@@ -105,7 +106,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_23_000001) do
     t.decimal "total_price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["clients_id", "created_at"], name: "index_purchases_on_clients_id_and_created_at"
     t.index ["clients_id"], name: "index_purchases_on_clients_id"
+    t.index ["created_at"], name: "index_purchases_on_created_at"
   end
 
   add_foreign_key "admin_change_logs", "admins"

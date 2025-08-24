@@ -13,6 +13,12 @@ require "rails/test_help"
 #   Place your test cases inside classes that inherit from ActiveSupport::TestCase
 #   to automatically benefit from parallelization and fixture loading.
 module ActiveSupport
+  # TestCase is a base class for test cases, providing configuration for parallel test execution
+  # and automatic loading of all fixtures.
+  #
+  # Features:
+  # - Runs tests in parallel using the number of available processors.
+  # - Loads all fixtures from test/fixtures/*.yml for use in tests.
   class TestCase
     # Run tests in parallel with specified workers
     parallelize(workers: :number_of_processors)

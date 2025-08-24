@@ -1,3 +1,11 @@
+# Provides authentication functionality for controllers by verifying JWT tokens
+# and setting the current admin user.
+#
+# This concern:
+# - Includes the JsonWebToken module for JWT encoding/decoding.
+# - Adds a before_action to authenticate the admin before each controller action.
+# - Exposes a `current_admin` reader for accessing the authenticated admin.
+#
 module Authenticable
   extend ActiveSupport::Concern
   include JsonWebToken

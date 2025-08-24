@@ -1,483 +1,286 @@
+---
 openapi: 3.0.1
 info:
   title: Higher Sales API
   version: v1
   description: |
     REST API for managing categories, purchases, reports and authentication.
-    
-    Authentication uses JWT (Bearer token). Obtain a token via `POST /auth/login` and send it as:
-    
-    `Authorization: Bearer <token>`
-servers:
-  - url: http://localhost:3000
-    description: Local development
-security:
-  - bearerAuth: []
 
+    Authentication uses JWT (Bearer token). Obtain a token via POST /auth/login and send it as:
+
+    Authorization: Bearer <token>
 paths:
-  /auth/login:
+  "/auth/login":
     post:
-      tags: [Auth]
-      summary: Authenticate an admin and return a JWT token
-      operationId: login
-      security: []  # public
+      summary: Authenticate admin and get JWT
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '200':
+          description: authenticated
+        '401':
+          description: invalid credentials
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
-              required: [email, password]
               properties:
                 email:
                   type: string
                   format: email
                 password:
                   type: string
-                  format: password
+              required:
+              - email
+              - password
+  "/categories":
+    get:
+      summary: List categories
+      tags:
+      - Categories
       responses:
         '200':
-          description: Successful authentication
+          description: ok
+    post:
+      summary: Create category
+      tags:
+      - Categories
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: created
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+              - name
+  "/categories/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Show category
+      tags:
+      - Categories
+      responses:
+        '200':
+          description: ok
+    put:
+      summary: Update category
+      tags:
+      - Categories
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: updated
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+    delete:
+      summary: Delete category
+      tags:
+      - Categories
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: deleted
+        '401':
+          description: unauthorized
+  "/purchases":
+    get:
+      summary: List purchases
+      tags:
+      - Purchases
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: category_id
+        in: query
+        schema:
+          type: integer
+      - name: client_id
+        in: query
+        schema:
+          type: integer
+      - name: admin_id
+        in: query
+        schema:
+          type: integer
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: per_page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+      - name: include_products
+        in: query
+        schema:
+          type: boolean
+      - name: include_categories
+        in: query
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: ok
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  token:
-                    type: string
-                  admin:
-                    $ref: '#/components/schemas/Admin'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  _metadata:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                      total_pages:
+                        type: integer
         '401':
-          description: Invalid email or password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /categories:
+          description: unauthorized
+  "/purchases/counts":
     get:
-      tags: [Categories]
-      summary: List all categories
-      operationId: listCategories
-      security: []  # public
+      summary: Counts of purchases grouped by time bucket
+      tags:
+      - Purchases
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: granularity
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - hour
+          - day
+          - week
+          - year
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: category_id
+        in: query
+        schema:
+          type: integer
+      - name: client_id
+        in: query
+        schema:
+          type: integer
+      - name: admin_id
+        in: query
+        schema:
+          type: integer
       responses:
         '200':
-            description: List of categories
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Category'
-    post:
-      tags: [Categories]
-      summary: Create a category
-      operationId: createCategory
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [category]
-              properties:
-                category:
-                  $ref: '#/components/schemas/NewCategory'
-      responses:
-        '201':
-          description: Category created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
+          description: ok
+        '422':
+          description: invalid granularity
         '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-        '422':
-          description: Validation errors
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrors'
-  /categories/{id}:
+          description: unauthorized
+  "/reports/top-products-by-category":
     get:
-      tags: [Categories]
-      summary: Retrieve a category by ID
-      operationId: getCategory
-      security: []  # public
+      summary: Top products by category
+      tags:
+      - Reports
+      security:
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
       responses:
         '200':
-          description: Category found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
-        '404':
-          description: Not found
-    put:
-      tags: [Categories]
-      summary: Update a category
-      operationId: updateCategory
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [category]
-              properties:
-                category:
-                  $ref: '#/components/schemas/UpdateCategory'
-      responses:
-        '200':
-          description: Updated category
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
-        '401': { description: Unauthorized }
-        '422':
-          description: Validation errors
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ValidationErrors' }
-    delete:
-      tags: [Categories]
-      summary: Delete a category
-      operationId: deleteCategory
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '204': { description: Deleted }
-        '401': { description: Unauthorized }
-        '404': { description: Not found }
-
-  /reports/top-products-by-category:
+          description: ok
+        '401':
+          description: unauthorized
+  "/reports/top-revenue-products-by-category":
     get:
-      tags: [Reports]
-      summary: Top N products by units sold for each category
-      operationId: topProductsByCategory
+      summary: Top revenue products by category
+      tags:
+      - Reports
+      security:
+      - bearerAuth: []
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-            default: 3
-            minimum: 1
-          description: Number of top products per category
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
       responses:
         '200':
-          description: Grouped results
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TopProductsByCategory'
-  /reports/top-revenue-products-by-category:
-    get:
-      tags: [Reports]
-      summary: Top N products by total revenue for each category
-      operationId: topRevenueProductsByCategory
-      parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-            default: 3
-            minimum: 1
-          description: Number of top products per category
-      responses:
-        '200':
-          description: Grouped results
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TopRevenueProductsByCategory'
-
-  /purchases:
-    get:
-      tags: [Purchases]
-      summary: List purchases with optional filters
-      operationId: listPurchases
-      parameters:
-        - in: query
-          name: from
-          schema:
-            type: string
-            format: date-time
-          description: Include purchases created at or after this timestamp/date
-        - in: query
-          name: to
-          schema:
-            type: string
-            format: date-time
-          description: Include purchases created at or before this timestamp/date
-        - in: query
-          name: category_id
-          schema:
-            type: integer
-        - in: query
-          name: client_id
-          schema:
-            type: integer
-        - in: query
-          name: admin_id
-          schema:
-            type: integer
-        - in: query
-          name: page
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-          description: Page number (1-based)
-        - in: query
-          name: per_page
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 25
-          description: Page size (max 100)
-      responses:
-        '200':
-          description: List of purchases
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedPurchases'
-  /purchases/counts:
-    get:
-      tags: [Purchases]
-      summary: Aggregated counts of purchases by time bucket
-      operationId: purchaseCounts
-      parameters:
-        - in: query
-          name: granularity
-          required: true
-          schema:
-            type: string
-            enum: [hour, day, week, year]
-          description: Bucket size for aggregation
-        - in: query
-          name: from
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: to
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: category_id
-          schema:
-            type: integer
-        - in: query
-          name: client_id
-          schema:
-            type: integer
-        - in: query
-          name: admin_id
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Aggregated counts
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PurchaseCountsResponse'
-        '422':
-          description: Invalid parameters (e.g. missing granularity)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
+          description: ok
+        '401':
+          description: unauthorized
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
-  schemas:
-    Admin:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-      required: [id, name, email]
-    Category:
-      type: object
-      properties:
-        id: { type: integer }
-        name: { type: string }
-        description: { type: string }
-        created_by_admin_id: { type: integer }
-        created_at: { type: string, format: date-time }
-        updated_at: { type: string, format: date-time }
-      required: [id, name, description, created_by_admin_id]
-    NewCategory:
-      type: object
-      properties:
-        name: { type: string, maxLength: 255 }
-        description: { type: string }
-      required: [name, description]
-    UpdateCategory:
-      allOf:
-        - $ref: '#/components/schemas/NewCategory'
-    Product:
-      type: object
-      properties:
-        id: { type: integer }
-        name: { type: string }
-        description: { type: string }
-        price: { type: number, format: float }
-        created_by_admin_id: { type: integer }
-        categories:
-          type: array
-          items:
-            $ref: '#/components/schemas/Category'
-      required: [id, name, price, created_by_admin_id]
-    PurchaseProduct:
-      type: object
-      properties:
-        id: { type: integer }
-        name: { type: string }
-        price: { type: number, format: float }
-        admin_id: { type: integer, description: 'Admin who created the product' }
-        categories:
-          type: array
-          items:
-            type: object
-            properties:
-              id: { type: integer }
-              name: { type: string }
-            required: [id, name]
-      required: [id, name, price, admin_id]
-    PurchaseClient:
-      type: object
-      properties:
-        id: { type: integer }
-        name: { type: string }
-      required: [id, name]
-    Purchase:
-      type: object
-      properties:
-        id: { type: integer }
-        created_at: { type: string, format: date-time }
-        total_price: { type: number, format: float }
-        client: { $ref: '#/components/schemas/PurchaseClient' }
-        products:
-          type: array
-          items: { $ref: '#/components/schemas/PurchaseProduct' }
-      required: [id, created_at, total_price, client, products]
-    PaginatedPurchases:
-      type: object
-      properties:
-        data:
-          type: array
-          items: { $ref: '#/components/schemas/Purchase' }
-        _metadata:
-          type: object
-          properties:
-            page: { type: integer }
-            per_page: { type: integer }
-            total: { type: integer }
-            total_pages: { type: integer }
-          required: [page, per_page, total, total_pages]
-      required: [data, _metadata]
-    PurchaseCountsResponse:
-      type: object
-      properties:
-        granularity:
-          type: string
-          enum: [hour, day, week, year]
-        data:
-          type: object
-          additionalProperties:
-            type: integer
-      required: [granularity, data]
-    TopProductsByCategoryProduct:
-      type: object
-      properties:
-        id: { type: integer }
-        name: { type: string }
-        total_sold: { type: integer }
-      required: [id, name, total_sold]
-    TopProductsByCategory:
-      type: object
-      properties:
-        category_id: { type: integer }
-        category_name: { type: string }
-        products:
-          type: array
-          items: { $ref: '#/components/schemas/TopProductsByCategoryProduct' }
-      required: [category_id, category_name, products]
-    TopRevenueProductsByCategoryProduct:
-      type: object
-      properties:
-        id: { type: integer }
-        name: { type: string }
-        total_revenue: { type: number, format: float }
-      required: [id, name, total_revenue]
-    TopRevenueProductsByCategory:
-      type: object
-      properties:
-        category_id: { type: integer }
-        category_name: { type: string }
-        products:
-          type: array
-          items: { $ref: '#/components/schemas/TopRevenueProductsByCategoryProduct' }
-      required: [category_id, category_name, products]
-    Error:
-      type: object
-      properties:
-        error:
-            type: string
-      required: [error]
-    ValidationErrors:
-      type: object
-      description: Key-value hash where each key is a field and value is an array of error messages
-      additionalProperties:
-        type: array
-        items:
-          type: string
-
-tags:
-  - name: Auth
-    description: Authentication operations
-  - name: Categories
-    description: Manage product categories
-  - name: Reports
-    description: Reporting endpoints
-  - name: Purchases
-    description: Purchase listings and aggregations
+security:
+- bearerAuth: []
+servers:
+- url: https://api.example.com
+  description: Production
+- url: http://localhost:3000
+  description: Development

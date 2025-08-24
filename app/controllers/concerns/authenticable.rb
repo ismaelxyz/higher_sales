@@ -25,6 +25,7 @@ module Authenticable
       @current_admin = admin
     else
       render json: { error: "Not Authorized" }, status: :unauthorized
+      nil
     end
   end
 end

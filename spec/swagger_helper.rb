@@ -18,19 +18,33 @@ RSpec.configure do |config|
     'v1/swagger.yaml' => {
       openapi: '3.0.1',
       info: {
-        title: 'API V1',
-        version: 'v1'
+        title: 'Higher Sales API',
+        version: 'v1',
+        description: <<~DESC
+          REST API for managing categories, purchases, reports and authentication.
+
+          Authentication uses JWT (Bearer token). Obtain a token via POST /auth/login and send it as:
+
+          Authorization: Bearer <token>
+        DESC
       },
       paths: {},
-      servers: [
-        {
-          url: 'https://{defaultHost}',
-          variables: {
-            defaultHost: {
-              default: 'www.example.com'
-            }
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: :http,
+            scheme: :bearer,
+            bearerFormat: 'JWT'
           }
         }
+      },
+      # Global security for all operations (operation-level security takes precedence if specified)
+      security: [
+        { bearerAuth: [] }
+      ],
+      servers: [
+        { url: 'https://api.example.com', description: 'Production' },
+        { url: 'http://localhost:3000', description: 'Development' }
       ]
     }
   }

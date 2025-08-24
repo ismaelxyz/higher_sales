@@ -16,7 +16,7 @@ class CategoriesController < ApplicationController
   end
 
   def create
-    @category = Category.new(category_params)
+    @category = Category.new(category_params.merge(created_by_admin: current_admin))
     if @category.save
       render json: @category, status: :created
     else
@@ -29,7 +29,7 @@ class CategoriesController < ApplicationController
     if @category.update(category_params)
       render json: @category
     else
-      render json: @category.errors, status: :unprocessable_content
+  render json: @category.errors, status: :unprocessable_content
     end
   end
 

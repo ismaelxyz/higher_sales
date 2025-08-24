@@ -40,7 +40,7 @@ gem "bcrypt", "~> 3.1"
 gem "jwt", "~> 2.8"
 
 # Background processing (Sidekiq for daily purchases report)
-gem "sidekiq", "~> 7.2"
+gem "sidekiq", "~> 8.0"
 gem "sidekiq-cron", "~> 1.12"
 
 

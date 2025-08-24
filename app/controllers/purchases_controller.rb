@@ -13,7 +13,15 @@ class PurchasesController < ApplicationController
     page = 1 if page < 1
     per_page = params[:per_page].to_i
     per_page = 25 if per_page <= 0
-    per_page = 100 if per_page > 100
+    per_page = 50 if per_page > 50
+
+    # Control heavy nested associations via flag (defaults to true for backward compatibility)
+    include_categories = ActiveModel::Type::Boolean.new.cast(
+      params.key?(:include_categories) ? params[:include_categories] : true
+    )
+    include_products = ActiveModel::Type::Boolean.new.cast(
+      params.key?(:include_products) ? params[:include_products] : true
+    )
 
   total = scope
         .except(:order, :select)
@@ -21,14 +29,24 @@ class PurchasesController < ApplicationController
         .count(:id)
     total_pages = (total.to_f / per_page).ceil
 
+    # Fetch only columns used in the serializer to reduce memory
     purchases = scope
+                  .select(:id, :created_at, :total_price, :clients_id)
                   .order(created_at: :desc)
                   .limit(per_page)
                   .offset((page - 1) * per_page)
-                  .includes(:client, products_solds: { product: { products_categories: :category } })
+
+    # Preload associations in separate queries to avoid row explosion from JOINs
+    if include_products
+      preload_map = { products_solds: { product: [] } }
+      preload_map[:products_solds][:product] << :categories if include_categories
+      purchases = purchases.preload(:client, preload_map)
+    else
+      purchases = purchases.preload(:client)
+    end
 
     render json: {
-      data: purchases.map { |p| serialize_purchase(p) },
+      data: purchases.map { |p| serialize_purchase(p, include_categories: include_categories, include_products: include_products) },
       _metadata: {
         page: page,
         per_page: per_page,
@@ -97,23 +115,28 @@ class PurchasesController < ApplicationController
     purchases
   end
 
-  def serialize_purchase(purchase)
-    {
+  def serialize_purchase(purchase, include_categories: true, include_products: true)
+    base = {
       id: purchase.id,
       created_at: purchase.created_at,
       total_price: purchase.total_price.to_f,
-      client: { id: purchase.client.id, name: purchase.client.name },
-      products: purchase.products_solds.map do |ps|
+      client: { id: purchase.client.id, name: purchase.client.name }
+    }
+
+    if include_products
+      base[:products] = purchase.products_solds.map do |ps|
         prod = ps.product
         {
           id: prod.id,
           name: prod.name,
           price: ps.price.to_f,
           admin_id: prod.created_by_admin_id,
-          categories: prod.categories.map { |c| { id: c.id, name: c.name } }
+          categories: include_categories ? prod.categories.map { |c| { id: c.id, name: c.name } } : nil
         }
       end
-    }
+    end
+
+    base
   end
 
   def parse_date_time(value)

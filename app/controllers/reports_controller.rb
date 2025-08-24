@@ -1,3 +1,4 @@
+# Controller for generating various sales reports.
 class ReportsController < ApplicationController
   # GET /reports/top-products-by-category?limit=3
   def top_products_by_category

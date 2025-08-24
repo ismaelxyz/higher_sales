@@ -75,19 +75,19 @@ class PurchasesController < ApplicationController
       purchases = purchases.where("purchases.created_at <= ?", to_time) if to_time
     end
 
-    if params[:client_id].present?
-      purchases = purchases.where(clients_id: params[:client_id])
+    if (client_id = params[:client_id])&.present?
+      purchases = purchases.where(clients_id: client_id)
     end
 
-    if params[:category_id].present?
+    if (category_id = params[:category_id])&.present?
       purchases = purchases.joins(products_solds: { product: :products_categories })
-                           .where(products_categories: { categories_id: params[:category_id] })
+                           .where(products_categories: { categories_id: category_id })
                            .distinct
     end
 
-    if params[:admin_id].present?
+    if (admin_id = params[:admin_id])&.present?
       purchases = purchases.joins(products_solds: { product: :created_by_admin })
-                           .where(products: { created_by_admin_id: params[:admin_id] })
+                           .where(products: { created_by_admin_id: admin_id })
                            .distinct
     end
 

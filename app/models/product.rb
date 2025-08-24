@@ -1,3 +1,4 @@
+# Represents a product in the system.
 class Product < ApplicationRecord
   belongs_to :created_by_admin, class_name: "Admin"
   has_many :images

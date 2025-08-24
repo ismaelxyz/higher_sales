@@ -1,3 +1,8 @@
+# CategoriesController handles CRUD operations for Category resources.
+#
+# Notes:
+# - Skips admin authentication for index and show actions.
+# - Responds with JSON for all actions.
 class CategoriesController < ApplicationController
   skip_before_action :authenticate_admin!, only: [ :index, :show ]
   def index

@@ -48,6 +48,8 @@ Rails.application.configure do
 
   # Use Sidekiq for background jobs (replaces SolidQueue)
   config.active_job.queue_adapter = :sidekiq
+  # Ensure mailers are enqueued on the dedicated :mailers queue
+  config.action_mailer.deliver_later_queue_name = :mailers
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.

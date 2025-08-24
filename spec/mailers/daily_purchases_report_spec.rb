@@ -32,9 +32,11 @@ RSpec.describe 'DailyPurchasesReport', type: :mailer do
         # Create a purchase today that must be excluded
         create(:purchase, client: client, product: product_b)
 
-        expect {
-          DailyPurchasesReportWorker.perform_async(date_yesterday.to_s)
-        }.to change { ActionMailer::Base.deliveries.count }.by(1)
+        perform_enqueued_jobs do
+          expect {
+            DailyPurchasesReportWorker.perform_async(date_yesterday.to_s)
+          }.to change { ActionMailer::Base.deliveries.count }.by(1)
+        end
 
         email = ActionMailer::Base.deliveries.last
         expected_recipients = Admin.pluck(:email)
@@ -51,9 +53,11 @@ RSpec.describe 'DailyPurchasesReport', type: :mailer do
       create_list(:admin, 2)
       date_yesterday = Date.new(2025, 8, 13)
 
-      expect {
-        DailyPurchasesReportWorker.perform_async(date_yesterday.to_s)
-      }.to change { ActionMailer::Base.deliveries.count }.by(1)
+      perform_enqueued_jobs do
+        expect {
+          DailyPurchasesReportWorker.perform_async(date_yesterday.to_s)
+        }.to change { ActionMailer::Base.deliveries.count }.by(1)
+      end
 
       email = ActionMailer::Base.deliveries.last
       expect(email.body.decoded).to include('No purchases were made yesterday')

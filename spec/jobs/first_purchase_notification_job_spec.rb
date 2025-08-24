@@ -14,14 +14,14 @@ RSpec.describe FirstPurchaseNotificationJob, type: :job do
     ps = purchase.products_solds.first
 
     # Run the same job twice "at the same time" to simulate a duplicate/concurrent execution
-    t1 = Thread.new { FirstPurchaseNotificationJob.new.perform(ps.id) }
-    t2 = Thread.new { FirstPurchaseNotificationJob.new.perform(ps.id) }
-    [ t1, t2 ].each(&:join)
+    perform_enqueued_jobs do
+      t1 = Thread.new { FirstPurchaseNotificationJob.new.perform(ps.id) }
+      t2 = Thread.new { FirstPurchaseNotificationJob.new.perform(ps.id) }
+      [ t1, t2 ].each(&:join)
+    end
 
-    # Exactly one record should exist due to the unique index on client_id
     expect(ClientFirstPurchaseNotification.where(client: client).count).to eq(1)
 
-    # Only one email should be delivered
     expect(ActionMailer::Base.deliveries.count).to eq(1)
   end
 end

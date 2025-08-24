@@ -57,6 +57,9 @@ Rails.application.configure do
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
 
+  # Route deliver_later to the mailers queue to mimic production behavior
+  config.action_mailer.deliver_later_queue_name = :mailers
+
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 

@@ -34,6 +34,6 @@ class FirstPurchaseNotificationJob < ApplicationJob
       return
     end
 
-    ProductMailer.first_purchase_notification(ps.product, client).deliver_now
+    ProductMailer.first_purchase_notification(ps.product, client).deliver_later
   end
 end

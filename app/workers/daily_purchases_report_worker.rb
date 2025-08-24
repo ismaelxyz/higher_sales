@@ -29,6 +29,7 @@ class DailyPurchasesReportWorker
     else
       Date.yesterday
     end
-    ProductMailer.daily_purchases_report(report_date).deliver_now
+
+    ProductMailer.daily_purchases_report(report_date).deliver_later
   end
 end
